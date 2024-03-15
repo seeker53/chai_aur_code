@@ -8,7 +8,7 @@ function App() {
 
   const addValue = ()=>{
     console.log("clicked",counter)
-    if(counter === 20)  alert('Value cannot be increased further')
+    if(counter === 20)  alert('so yeah Value cannot be increased further')
     else  counter = counter + 1
     setCounter(counter)
   }
