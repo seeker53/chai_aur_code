@@ -7,6 +7,7 @@ function App() {
   const [numberAllowed, setNumberAllowed] = useState(false);
   const [charAllowed, setCharAllowed] = useState(false)
   const [password, setPassword] = useState("")
+  const [isCopied, setIsCopied] = useState(false)
 
   //useRef hook
   const passwordRef = useRef(null)
@@ -31,6 +32,7 @@ function App() {
   const copyPasswordToClipboard = useCallback(() => {
     passwordRef.current?.setSelectionRange(0, password.length);
     window.navigator.clipboard.writeText(password)
+      .then(() => setIsCopied(true))
   }, [password])
 
   useEffect(() => {
@@ -44,7 +46,7 @@ function App() {
         <input
           type="text"
           value={password}
-          className="outline-none w-full py-1 px-3"
+          className={`outline-none w-full py-1 px-3 ${isCopied ? 'text-blue-300' : ' '}`}
           placeholder="Password"
           readOnly
           ref={passwordRef}
