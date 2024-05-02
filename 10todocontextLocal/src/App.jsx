@@ -6,7 +6,7 @@ import { TodoProvider } from './contexts/TodoContext'
 import TodoForm from './components/TodoForm'
 import TodoItem from './components/TodoItem'
 
-function App() {
+function App({ onLogout }) {
   const [todos, setTodos] = useState([])
 
   const addTodo = (todo) => {
@@ -39,10 +39,22 @@ function App() {
     localStorage.setItem("todos", JSON.stringify(todos))
   }, [todos])
 
+  const handleLogout = () => {
+    onLogout();
+  }
+
   return (
     <TodoProvider value={{ todos, addTodo, updateTodo, deleteTodo, toggleComplete }}>
       <div className="bg-[#172842] min-h-screen py-8">
         <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-3 text-white">
+          <div className="flex justify-end mb-4">
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </div>
           <h1 className="text-2xl font-bold text-center mb-8 mt-2">Manage Your Todos</h1>
           <div className="mb-4">
             {/* Todo form goes here */}
