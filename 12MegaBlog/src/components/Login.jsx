@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { login as authLogin } from '../store/authSlice'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Logo, Input } from './index'
-import { useDispatch } from 'react-redux'
-import authService from '../appwrite/auth'
-import { useForm } from 'react-hook-form'
+import { login as authLogin } from '../store/authSlice'
+import { Button, Input, Logo } from "./index"
+import { useDispatch } from "react-redux"
+import authService from "../appwrite/auth"
+import { useForm } from "react-hook-form"
+
 function Login() {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const [error, setError] = useState("");
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { register, handleSubmit } = useForm()
+    const [error, setError] = useState("")
 
     const login = async (data) => {
         setError("")
@@ -17,21 +18,14 @@ function Login() {
             const session = await authService.login(data)
             if (session) {
                 const userData = await authService.getCurrentUser()
+                if (userData) dispatch(authLogin(userData));
+                navigate("/")
             }
-        }
-        catch (error) {
-            setError(error.message);
+        } catch (error) {
+            setError(error.message)
         }
     }
-    const isValidPassword = (password) => {
-        const minLength = password.length >= 8;
-        const hasUpperCase = /[A-Z]/.test(password);
-        const hasLowerCase = /[a-z]/.test(password);
-        const hasNumber = /[0-9]/.test(password);
-        const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
 
-        return minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
-    };
     return (
         <div
             className='flex items-center justify-center w-full'
@@ -73,20 +67,8 @@ function Login() {
                             placeholder="Enter your password"
                             {...register("password", {
                                 required: true,
-                                validate: (value) => isValidPassword(value) || "Password must meet the criteria",
                             })}
                         />
-                        {errors.password && <p className="text-red-600">{errors.password.message}</p>}
-                        <div>
-                            <p>Password requirements:</p>
-                            <ul>
-                                <li style={{ color: password.length >= 8 ? "green" : "red" }}>Minimum 8 characters</li>
-                                <li style={{ color: /[A-Z]/.test(password) ? "green" : "red" }}>At least one uppercase letter</li>
-                                <li style={{ color: /[a-z]/.test(password) ? "green" : "red" }}>At least one lowercase letter</li>
-                                <li style={{ color: /[0-9]/.test(password) ? "green" : "red" }}>At least one number</li>
-                                <li style={{ color: /[^a-zA-Z0-9]/.test(password) ? "green" : "red" }}>At least one special character</li>
-                            </ul>
-                        </div>
                         <Button
                             type="submit"
                             className="w-full"

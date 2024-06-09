@@ -10,7 +10,7 @@ function EditPost() {
         if (slug) {
             appwriteService.getPost(slug).then((post) => {
                 if (post) {
-                    setPosts(post)
+                    setPost(post)
                 }
             })
         }

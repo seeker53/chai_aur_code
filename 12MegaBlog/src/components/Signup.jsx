@@ -1,35 +1,39 @@
-import React from 'react'
-import authService from '../appwrite/auth'
-import { login } from '../store/authSlice'
-import { Button, Logo, Input } from './index'
-import { useForm } from 'react-hook-form'
-import { useDispatch } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import authService from '../appwrite/auth';
+import { login } from '../store/authSlice';
+import { Button, Logo, Input } from './index';
+import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+
 function Signup() {
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const { register, handleSubmit } = useForm()
-    const [error, setError] = useState('')
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { register, handleSubmit } = useForm();
+    const [error, setError] = useState('');
 
     const create = async (data) => {
-        setError('')
+        setError('');
         try {
-            const useData = await authService.createAccount(data)
+            console.log("Creating account with data:", data);
+            const useData = await authService.createAccount(data);
             if (useData) {
-                const userData = await authService.getCurrentUser()
+                console.log("Account creation and login successful, fetching current user");
+                const userData = await authService.getCurrentUser();
                 if (userData) {
-                    dispatch(login(userData))
-                    navigate('/')
+                    dispatch(login(userData));
+                    navigate('/');
                 }
-
             }
         } catch (error) {
-            setError(error.message)
+            console.error("Error during signup:", error);
+            setError(error.message);
         }
-    }
+    };
+
     return (
         <div className="flex items-center justify-center">
-            <div className={`mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10`}>
+            <div className="mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10">
                 <div className="mb-2 flex justify-center">
                     <span className="inline-block w-full max-w-[100px]">
                         <Logo width="100%" />
@@ -63,9 +67,9 @@ function Signup() {
                             {...register("email", {
                                 required: true,
                                 validate: {
-                                    matchPatern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
-                                        "Email address must be a valid address",
-                                }
+                                    matchPattern: (value) =>
+                                        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) || "Email address must be a valid address",
+                                },
                             })}
                         />
                         <Input
@@ -82,9 +86,8 @@ function Signup() {
                     </div>
                 </form>
             </div>
-
         </div>
-    )
+    );
 }
 
-export default Signup
+export default Signup;
