@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Input, RTE, Select } from "..";
-import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { createPost, updatePost } from "../../store/postSlice";
+import { uploadFile, deleteFile } from "../../store/fileSlice";
 
 export default function PostForm({ post }) {
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
@@ -16,36 +17,37 @@ export default function PostForm({ post }) {
     });
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const userData = useSelector((state) => state.auth.userData);
 
     const submit = async (data) => {
+        let fileId;
+        if (data.image && data.image.length > 0) {
+            const fileResponse = await dispatch(uploadFile(data.image[0])).unwrap();
+            fileId = fileResponse.$id;
+        }
+
         if (post) {
-            const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
-
-            if (file) {
-                appwriteService.deleteFile(post.featuredImage);
+            if (fileId) {
+                await dispatch(deleteFile(post.featuredImage));
             }
 
-            const dbPost = await appwriteService.updatePost(post.$id, {
+            const updatedPost = {
                 ...data,
-                featuredImage: file ? file.$id : undefined,
-            });
+                featuredImage: fileId || post.featuredImage,
+            };
 
-            if (dbPost) {
-                navigate(`/post/${dbPost.$id}`);
-            }
+            const response = await dispatch(updatePost({ slug: post.$id, post: updatedPost })).unwrap();
+            navigate(`/post/${response.$id}`);
         } else {
-            const file = await appwriteService.uploadFile(data.image[0]);
+            const newPost = {
+                ...data,
+                featuredImage: fileId,
+                userId: userData.$id,
+            };
 
-            if (file) {
-                const fileId = file.$id;
-                data.featuredImage = fileId;
-                const dbPost = await appwriteService.createPost({ ...data, userId: userData.$id });
-
-                if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`);
-                }
-            }
+            const response = await dispatch(createPost(newPost)).unwrap();
+            navigate(`/post/${response.$id}`);
         }
     };
 
@@ -101,7 +103,7 @@ export default function PostForm({ post }) {
                 {post && (
                     <div className="w-full mb-4">
                         <img
-                            src={appwriteService.getFilePreview(post.featuredImage)}
+                            src={`https://your-appwrite-endpoint/v1/storage/files/${post.featuredImage}/preview`} // Replace with your Appwrite endpoint
                             alt={post.title}
                             className="rounded-lg"
                         />
